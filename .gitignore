@@ -10,6 +10,19 @@ Thumbs.db
 .env
 .env.*
 *.local
+.codex
 
 # Logs
 *.log
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# Runtime state
+data/
+
+# Build artifacts
+*.tar
