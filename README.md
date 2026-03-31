@@ -34,6 +34,7 @@ These choices were not fully fixed by the specification, so they are documented 
 ```text
 docs/
   implementation-preparation-pack.md
+scripts/
 src/
   grist_finance_connector/
     config/
@@ -45,12 +46,26 @@ src/
     services/
     state/
     main.py
+templates/
+  grist/
 tests/
 Dockerfile
 docker-compose.yml
 .env.example
 pyproject.toml
 ```
+
+## Grist Template File
+
+Store the exported Grist template file in `templates/grist/`.
+
+Suggested example filename:
+
+```text
+templates/grist/bank-api-connector-template.grist
+```
+
+The folder includes its own note at `templates/grist/README.md` so the template location stays documented in the repository.
 
 ## Planned Build Order
 
@@ -64,9 +79,10 @@ pyproject.toml
 
 1. Copy `.env.example` to `.env`
 2. Fill in the Grist and provider settings
-3. Run `docker compose up --build`
-4. Check `GET /health`
-5. Trigger `POST /sync` for a manual run
+3. If you are keeping a reusable Grist template file for this project, place it in `templates/grist/`
+4. Run `docker compose up --build`
+5. Check `GET /health`
+6. Trigger `POST /sync` for a manual run
 
 ## Key Documents
 
@@ -75,6 +91,7 @@ pyproject.toml
 - [Grist Schema Bootstrap Guidance](./docs/grist-schema-bootstrap.md)
 - [Starling Docker Setup Guide](./docs/starling-docker-setup.md)
 - [Scripts README](./scripts/README.md)
+- [Grist Template Folder Note](./templates/grist/README.md)
 
 ## Grist Tables Required
 
@@ -96,10 +113,10 @@ The required `Spaces` columns are:
 
 See [Grist Schema Bootstrap Guidance](./docs/grist-schema-bootstrap.md) for the full table setup.
 
-## Production Deployment Files
+## Deployment Files
 
-- [Production Compose File](./docker-compose.prod.yml)
-- [Starling Environment Template](./.env.starling.example)
+- [Docker Compose File](./docker-compose.yml)
+- [Environment Template](./.env.example)
 
 ## Starling Bank
 
@@ -150,13 +167,13 @@ STARLING_ACCOUNT_UIDS=account_uid_one,account_uid_two
 To print your available Starling `accountUid` values safely from your token:
 
 ```bash
-python3 scripts/print_starling_accounts.py --env-file .env.starling
+python3 scripts/print_starling_accounts.py --env-file .env
 ```
 
 To preview a few normalized Starling transactions before connecting writes to Grist:
 
 ```bash
-python3 scripts/preview_starling_transactions.py --env-file .env.starling --days 7 --limit 5
+python3 scripts/preview_starling_transactions.py --env-file .env --days 7 --limit 5
 ```
 
 ## Sync Scheduling
@@ -306,7 +323,7 @@ If you want local-time behavior, you should calculate the equivalent UTC schedul
 The Compose file does not itself define the sync interval.
 It only passes environment variables into the container.
 
-For example, if your `.env.starling` contains:
+For example, if your `.env` contains:
 
 ```env
 SCHEDULER_ENABLED=true
@@ -315,7 +332,7 @@ SOURCE_SCHEDULE=0 * * * *
 
 then after the container starts, the app will run an hourly sync.
 
-If your `.env.starling` contains:
+If your `.env` contains:
 
 ```env
 SCHEDULER_ENABLED=false
@@ -360,7 +377,7 @@ RUN_SYNC_ON_STARTUP=false
 Then recreate the container:
 
 ```bash
-docker compose -f docker-compose.prod.yml --env-file .env.starling up -d --force-recreate
+docker compose up -d --force-recreate
 ```
 
 ### `RUN_SYNC_ON_STARTUP`
@@ -418,7 +435,7 @@ SOURCE_SCHEDULE=*/15 * * * *
 2. Recreate the container:
 
 ```bash
-docker compose -f docker-compose.prod.yml --env-file .env.starling up -d --force-recreate
+docker compose up -d --force-recreate
 ```
 
 3. Watch logs:
@@ -432,8 +449,8 @@ docker logs -f grist-finance-connector
 ### Practical Summary
 
 - Docker Compose starts the service
-- `.env.starling` controls whether auto-sync is enabled
-- `.env.starling` controls how often sync runs
+- `.env` controls whether auto-sync is enabled
+- `.env` controls how often sync runs
 - `POST /sync` always lets you trigger a manual sync regardless of schedule
 - current scheduler timing is based on UTC
 

@@ -4,11 +4,12 @@ services:
   connector:
     build:
       context: .
+    image: grist-finance-connector:0.1.0
     container_name: grist-finance-connector
     env_file:
       - .env
     ports:
-      - "${SERVICE_PORT:-8080}:8080"
+      - "127.0.0.1:${SERVICE_PORT:-8080}:8080"
     volumes:
       - connector_state:/data/state
     restart: unless-stopped
@@ -18,6 +19,11 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
 
 volumes:
   connector_state:

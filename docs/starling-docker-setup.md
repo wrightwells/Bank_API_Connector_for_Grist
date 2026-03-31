@@ -85,7 +85,7 @@ Do not commit `.env` to git.
 This repository includes a helper script:
 
 ```bash
-python3 scripts/print_starling_accounts.py --env-file .env.starling
+python3 scripts/print_starling_accounts.py --env-file .env
 ```
 
 It reads:
@@ -111,7 +111,7 @@ STARLING_ACCOUNT_UID=that_account_uid_here
 This repository also includes a read-only transaction preview helper:
 
 ```bash
-python3 scripts/preview_starling_transactions.py --env-file .env.starling --days 7 --limit 5
+python3 scripts/preview_starling_transactions.py --env-file .env --days 7 --limit 5
 ```
 
 What it does:

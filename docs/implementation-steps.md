@@ -50,8 +50,8 @@ Expected result:
 Copy these to the server:
 
 - `grist-finance-connector_0.1.0.tar`
-- `docker-compose.prod.yml`
-- `.env.starling`
+- `docker-compose.yml`
+- `.env`
 
 Optional but useful:
 
@@ -63,8 +63,8 @@ Example copy command:
 
 ```bash
 scp grist-finance-connector_0.1.0.tar user@server:/opt/grist-finance-connector/
-scp docker-compose.prod.yml user@server:/opt/grist-finance-connector/
-scp .env.starling user@server:/opt/grist-finance-connector/
+scp docker-compose.yml user@server:/opt/grist-finance-connector/
+scp .env user@server:/opt/grist-finance-connector/
 ```
 
 ## 4. Load the Image on the Server
@@ -83,77 +83,24 @@ Expected result:
 
 ## 5. Important Compose Detail
 
-If you are **not** building on the server, your Compose file should run from the preloaded image.
+The repository now keeps a single Compose file: `docker-compose.yml`.
 
-The current project `docker-compose.prod.yml` includes both:
+It includes both:
 
 - `build:`
 - `image:`
 
-That is fine when the full repo exists on the server.
+That works well when you run from the repository checkout.
 
-If the server only has:
+If you are deploying from a preloaded tar image on a server, copy the repo files you need alongside `docker-compose.yml` and `.env`, then run the same Compose file there.
 
-- the tar image
-- the compose file
-- the env file
-
-then the safest approach is to use an image-only Compose file.
-
-## 6. Server Compose File
-
-Create a server-side compose file such as `docker-compose.server.yml`:
-
-```yaml
-version: "3.9"
-
-services:
-  connector:
-    image: grist-finance-connector:0.1.0
-    container_name: grist-finance-connector
-    env_file:
-      - .env.starling
-    ports:
-      - "127.0.0.1:${SERVICE_PORT:-8080}:8080"
-    volumes:
-      - connector_state:/data/state
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3)"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-    security_opt:
-      - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /tmp
-
-volumes:
-  connector_state:
-```
-
-This avoids trying to build on the server.
-
-## 7. Start the Container on the Server
-
-If you are using the image-only server compose:
+## 6. Start the Container on the Server
 
 ```bash
-docker compose -f docker-compose.server.yml --env-file .env.starling up -d
+docker compose up -d
 ```
 
-If you have the full repo on the server and want to build there instead:
-
-```bash
-cd /home/ww/src/Bank_API_Connector_for_Grist
-docker build -t grist-finance-connector:0.1.0 .
-docker save grist-finance-connector:0.1.0 -o grist-finance-connector_0.1.0.tar
-docker compose -f docker-compose.prod.yml --env-file .env.starling up -d
-```
-
-## 8. Verify the Container Is Running
+## 7. Verify the Container Is Running
 
 ```bash
 docker ps
@@ -166,7 +113,7 @@ Expected result:
 - container is running
 - health endpoint returns JSON with `"status": "ok"`
 
-## 9. First Sync Test
+## 8. First Sync Test
 
 For first deployment, use:
 
@@ -197,7 +144,7 @@ DRY_RUN=false
 Then recreate the container:
 
 ```bash
-docker compose -f docker-compose.server.yml --env-file .env.starling up -d --force-recreate
+docker compose up -d --force-recreate
 ```
 
 Run sync again:
@@ -206,7 +153,7 @@ Run sync again:
 curl -X POST http://127.0.0.1:8080/sync
 ```
 
-## 10. Fresh Start / Reset Persistence
+## 9. Fresh Start / Reset Persistence
 
 If you need a clean start, you must remove the persisted sync state.
 
@@ -229,7 +176,7 @@ Inside that volume, the SQLite file is:
 Stop the container:
 
 ```bash
-docker compose -f docker-compose.server.yml --env-file .env.starling down
+docker compose down
 ```
 
 Find the volume:
@@ -247,7 +194,7 @@ docker volume rm <actual_volume_name>
 Then start again:
 
 ```bash
-docker compose -f docker-compose.server.yml --env-file .env.starling up -d
+docker compose up -d
 ```
 
 ### If you later switch to a host bind mount
@@ -263,12 +210,12 @@ That is the file that stores:
 - last successful sync state
 - job history
 
-## 11. Useful Files to Keep on the Server
+## 10. Useful Files to Keep on the Server
 
 At minimum:
 
-- `docker-compose.server.yml`
-- `.env.starling`
+- `docker-compose.yml`
+- `.env`
 - `grist-finance-connector_0.1.0.tar`
 
 Useful extras:
@@ -277,11 +224,11 @@ Useful extras:
 - a copy of this implementation guide
 - notes with your chosen schedule and Grist document ID
 
-## 12. Useful Things People Forget
+## 11. Useful Things People Forget
 
 ### 1. The container needs Grist connection settings
 
-Your `.env.starling` must include:
+Your `.env` must include:
 
 ```env
 GRIST_BASE_URL=http://grist:8484
@@ -346,7 +293,7 @@ then:
 - fetched counts can be non-zero
 - but transaction/account/space tables will not be written
 
-## 13. Recommended First Production Settings
+## 12. Recommended First Production Settings
 
 After testing:
 
@@ -357,7 +304,7 @@ SOURCE_SCHEDULE=0 * * * *
 RUN_SYNC_ON_STARTUP=false
 ```
 
-## 14. Quick Command Summary
+## 13. Quick Command Summary
 
 ### Build on dev machine
 
@@ -376,7 +323,7 @@ docker images | grep grist-finance-connector
 ### Start on server
 
 ```bash
-docker compose -f docker-compose.server.yml --env-file .env.starling up -d
+docker compose up -d
 ```
 
 ### Manual sync
@@ -394,8 +341,8 @@ docker logs -f grist-finance-connector
 ### Reset persistence
 
 ```bash
-docker compose -f docker-compose.server.yml --env-file .env.starling down
+docker compose down
 docker volume ls | grep connector_state
 docker volume rm <actual_volume_name>
-docker compose -f docker-compose.server.yml --env-file .env.starling up -d
+docker compose up -d
 ```

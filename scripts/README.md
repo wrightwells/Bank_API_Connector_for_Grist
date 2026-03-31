@@ -5,16 +5,18 @@ This folder contains small helper scripts for validating Starling connectivity b
 These scripts are read-only helpers.
 They do not write data into Grist.
 
+If you are keeping a reusable Grist document template for this project, store it in `templates/grist/`.
+
 ## Prerequisites
 
 Before running the scripts:
 
-1. create an env file, usually `.env.starling`
+1. create an env file, usually `.env`
 2. set your Starling access token in that file
 3. set `SOURCE_PROVIDER=starling`
 4. make sure `python3` is installed
 
-Minimum `.env.starling` values:
+Minimum `.env` values:
 
 ```env
 SOURCE_PROVIDER=starling
@@ -62,7 +64,7 @@ Purpose:
 Run it with:
 
 ```bash
-python3 scripts/print_starling_accounts.py --env-file .env.starling
+python3 scripts/print_starling_accounts.py --env-file .env
 ```
 
 Expected output:
@@ -99,19 +101,19 @@ Purpose:
 Run it with:
 
 ```bash
-python3 scripts/preview_starling_transactions.py --env-file .env.starling
+python3 scripts/preview_starling_transactions.py --env-file .env
 ```
 
 Example with custom window and sample size:
 
 ```bash
-python3 scripts/preview_starling_transactions.py --env-file .env.starling --days 7 --limit 5
+python3 scripts/preview_starling_transactions.py --env-file .env --days 7 --limit 5
 ```
 
 Arguments:
 
 - `--env-file`
-  - env file to load, for example `.env.starling`
+  - env file to load, for example `.env`
 - `--days`
   - how many days of Starling transactions to request
   - default: `7`
@@ -141,29 +143,33 @@ Use the scripts in this order:
 ## Safe Example Workflow
 
 ```bash
-cp .env.starling.example .env.starling
+cp .env.example .env
 ```
 
-Edit `.env.starling`, then run:
+Edit `.env`, then run:
 
 ```bash
-python3 scripts/print_starling_accounts.py --env-file .env.starling
-python3 scripts/preview_starling_transactions.py --env-file .env.starling --days 7 --limit 5
+python3 scripts/print_starling_accounts.py --env-file .env
+python3 scripts/preview_starling_transactions.py --env-file .env --days 7 --limit 5
 ```
 
 If the output looks right, proceed to Docker dry-run:
 
 ```bash
-docker compose -f docker-compose.prod.yml --env-file .env.starling up --build -d
+docker compose up --build -d
 curl http://127.0.0.1:8080/health
 curl -X POST http://127.0.0.1:8080/sync
 ```
+
+Related project file location:
+
+- Grist template folder: `templates/grist/`
 
 ## Troubleshooting
 
 ### Missing STARLING_ACCESS_TOKEN
 
-Make sure `.env.starling` contains:
+Make sure `.env` contains:
 
 ```env
 STARLING_ACCESS_TOKEN=your_real_starling_access_token
@@ -171,7 +177,7 @@ STARLING_ACCESS_TOKEN=your_real_starling_access_token
 
 ### Wrong provider selected
 
-Make sure `.env.starling` contains:
+Make sure `.env` contains:
 
 ```env
 SOURCE_PROVIDER=starling
@@ -195,7 +201,7 @@ Check:
 
 ## Security Notes
 
-- Do not commit `.env.starling`
+- Do not commit `.env`
 - Do not pass the Starling token on the command line if you can avoid it
-- Prefer `--env-file .env.starling`
+- Prefer `--env-file .env`
 - Treat script output as sensitive financial data

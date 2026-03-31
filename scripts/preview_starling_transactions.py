@@ -2,8 +2,8 @@
 """Fetch and print normalized Starling transactions without writing to Grist.
 
 Usage:
-  python3 scripts/preview_starling_transactions.py --env-file .env.starling
-  python3 scripts/preview_starling_transactions.py --env-file .env.starling --days 7 --limit 10
+  python3 scripts/preview_starling_transactions.py --env-file .env
+  python3 scripts/preview_starling_transactions.py --env-file .env --days 7 --limit 10
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--env-file",
-        help="Env file to read settings from, for example .env.starling",
+        help="Env file to read settings from, for example .env",
     )
     parser.add_argument(
         "--days",

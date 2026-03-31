@@ -3,7 +3,7 @@
 
 Usage:
   STARLING_ACCESS_TOKEN=... python3 scripts/print_starling_accounts.py
-  python3 scripts/print_starling_accounts.py --env-file .env.starling
+  python3 scripts/print_starling_accounts.py --env-file .env
 """
 
 from __future__ import annotations
