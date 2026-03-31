@@ -71,6 +71,7 @@ pyproject.toml
 ## Key Documents
 
 - [Implementation Preparation Pack](./docs/implementation-preparation-pack.md)
+- [Implementation Steps](./docs/implementation-steps.md)
 - [Grist Schema Bootstrap Guidance](./docs/grist-schema-bootstrap.md)
 - [Starling Docker Setup Guide](./docs/starling-docker-setup.md)
 - [Scripts README](./scripts/README.md)
